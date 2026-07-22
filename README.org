@@ -46,3 +46,18 @@ docker run -it \
        ckhrulev/pism-basic \
        bash -c "cd /pism/examples/std-greenland; ./spinup.sh 4 const 10000 20 sia g20km_10ka.nc"
 #+END_SRC
+
+Note that if you want to pass shell variables through Docker to PISM when calling it from outside Docker, each variable would need to be passed. It may be preferable to build your full PISM command (with variables) first, then pass and use only the pre-built full command.
+
+#+BEGIN_SRC bash :exports both :results verbatim
+nproc=4
+runyr=10000
+res=20
+pism_cmd="./spinup.sh ${nproc} const ${runyr} ${res} sia g20km_10ka.nc"
+docker run -it \
+       --user $(id -u):$(id -g) \
+       --mount type=bind,src=/path/to/pism-src-repository/,dst=/pism \
+       -e pism_cmd="${pism_cmd}" \
+       ckhrulev/pism-basic \
+       bash -c "cd /pism/examples/std-greenland; ${pism_cmd}"
+#+END_SRC
